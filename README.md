@@ -13,7 +13,10 @@ make reservations by just talking to Claude Code. They drive `resy_cli.py`
 
 - **resy-setup** — connect your Resy account. Walks you through copying your
   `api_key` and session `token` from the browser DevTools Network tab and
-  storing them (plus a payment method) in `credentials.json`.
+  storing them (plus a payment method) in `credentials.json`. If you're
+  running on your own machine (not a remote/cloud session), you can skip the
+  manual copying with `tools/capture_resy_credentials.py`, which drives a
+  visible browser and captures both values for you automatically.
 - **resy-reserve** — find, book, or snipe a reservation. Resolves the venue,
   lists open slots, and books the slot closest to your ideal time (or schedules
   a snipe at a reservation "drop" time).
