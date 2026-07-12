@@ -168,7 +168,7 @@ def test_book_slot():
         "Content-Type": "application/x-www-form-urlencoded",
         "Origin": "https://widgets.resy.com",
         "X-Origin": "https://widgets.resy.com",
-        "Referrer": "https://widgets.resy.com/",
+        "Referer": "https://widgets.resy.com/",
         "Cache-Control": "no-cache",
     }
 
