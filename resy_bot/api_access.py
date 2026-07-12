@@ -28,8 +28,8 @@ def build_session(config: ResyConfig) -> Session:
         "X-Resy-Auth-Token": config.token,
         "X-Resy-Universal-Auth": config.token,
         "Origin": "https://resy.com",
-        "X-origin": "https://resy.com",
-        "Referrer": "https://resy.com/",
+        "X-Origin": "https://resy.com",
+        "Referer": "https://resy.com/",
         "Accept": "application/json, text/plain, */*",
     }
 
@@ -115,7 +115,7 @@ class ResyApiAccess:
             "Content-Type": "application/x-www-form-urlencoded",
             "Origin": "https://widgets.resy.com",
             "X-Origin": "https://widgets.resy.com",
-            "Referrer": "https://widgets.resy.com/",
+            "Referer": "https://widgets.resy.com/",
             "Cache-Control": "no-cache",
         }
 
@@ -132,3 +132,53 @@ class ResyApiAccess:
         parsed_resp = BookResponseBody(**resp.json())
 
         return parsed_resp.resy_token
+
+    def get_user(self) -> dict:
+        user_url = RESY_BASE_URL + ResyEndpoints.USER.value
+
+        resp = self.session.get(user_url)
+
+        if not resp.ok:
+            raise HTTPError(f"Failed to get user: {resp.status_code}, {resp.text}")
+
+        return resp.json()
+
+    def search_venues(self, query: str, per_page: int = 5) -> List[dict]:
+        search_url = RESY_BASE_URL + ResyEndpoints.VENUE_SEARCH.value
+
+        resp = self.session.post(
+            search_url,
+            json={"query": query, "per_page": per_page},
+            headers={"Content-Type": "application/json"},
+        )
+
+        if not resp.ok:
+            raise HTTPError(
+                f"Failed to search venues: {resp.status_code}, {resp.text}"
+            )
+
+        hits = resp.json().get("search", {}).get("hits", [])
+
+        venues = []
+        for hit in hits:
+            try:
+                venue_id = hit.get("id", {}).get("resy")
+                if venue_id is None:
+                    venue_id = hit.get("objectID")
+
+                name = hit.get("name", "")
+                location = (
+                    hit.get("locality")
+                    or hit.get("region")
+                    or hit.get("neighborhood")
+                    or ""
+                )
+
+                venues.append(
+                    {"id": venue_id, "name": name, "location": location}
+                )
+            except Exception:
+                logger.info(f"Skipping malformed venue hit: {hit}")
+                continue
+
+        return venues

@@ -34,6 +34,11 @@ def build_get_slot_details_body(
 
 
 def build_auth_request_body(config: ResyConfig) -> AuthRequestBody:
+    if config.email is None or config.password is None:
+        raise ValueError(
+            "email and password are required for password-based auth; "
+            "this bot uses token-based auth by default"
+        )
     return AuthRequestBody(email=config.email, password=config.password)
 
 

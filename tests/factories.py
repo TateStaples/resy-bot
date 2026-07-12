@@ -58,7 +58,7 @@ class ReservationRetriesConfigFactory(factory.Factory):
         model = ReservationRetriesConfig
 
     seconds_between_retries = factory.LazyFunction(lambda: randint(0, 100) / 100)
-    retry_duration = factory.LazyFunction(lambda: randint(1, 10))
+    n_retries = factory.LazyFunction(lambda: randint(1, 10))
 
 
 class TimedReservationRequestFactory(factory.Factory):

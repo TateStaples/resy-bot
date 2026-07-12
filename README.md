@@ -5,6 +5,56 @@ these can be investigated by taking a look at the `api.resy.com`
 calls from the network tab. We can have some fun making automated
 calls to those endpoints right when reservations become available
 
+## Conversational use (Claude Code)
+
+This repo ships two Claude Code skills that let you set up your account and
+make reservations by just talking to Claude Code. They drive `resy_cli.py`
+(one JSON object per command on stdout).
+
+- **resy-setup** — connect your Resy account. Walks you through copying your
+  `api_key` and session `token` from the browser DevTools Network tab and
+  storing them (plus a payment method) in `credentials.json`.
+- **resy-reserve** — find, book, or snipe a reservation. Resolves the venue,
+  lists open slots, and books the slot closest to your ideal time (or schedules
+  a snipe at a reservation "drop" time).
+
+Auth is now **token-based** — no password is needed. You copy a static
+frontend `api_key` and an ES256-signed `X-Resy-Auth-Token` session JWT from
+the browser; the JWT lasts ~45 days and is re-copied when it expires.
+
+Example commands:
+
+```bash
+# Store credentials (add --payment-method-id before booking)
+python resy_cli.py setup --api-key "<api_key>" --token "<token>"
+
+# Verify auth and list saved cards
+python resy_cli.py check
+python resy_cli.py payment-methods
+
+# Find a venue, then list open slots
+python resy_cli.py search-venue --query "Carbone"
+python resy_cli.py find --venue-id 12345 --day 2026-07-20 --party-size 2
+
+# Book the slot closest to 19:00 now
+python resy_cli.py book --venue-id 12345 --day 2026-07-20 --party-size 2 --ideal-time 19:00 --window-hours 1
+
+# Or wait until the 10:00 drop and race to book
+python resy_cli.py schedule --venue-id 12345 --day 2026-07-20 --party-size 2 --ideal-time 19:00 --drop-time 10:00
+```
+
+## API status (as of 2026)
+
+Verified current in July 2026:
+
+- Endpoints `/4/find`, `/3/details`, and `/3/book` (plus `/3/venuesearch/search`
+  and `/2/user`) are the live endpoints used by the bot.
+- The booking request now requires a **`Referer`** header (this was previously
+  mis-sent as `Referrer` and rejected by Resy).
+- Auth is **token-based**: an `Authorization: ResyAPI api_key="..."` header plus
+  an ES256-signed `X-Resy-Auth-Token` session JWT. The token expires roughly
+  every **45 days** and must be refreshed by re-copying it from the browser.
+
 ## Running
 
 ### Dependencies

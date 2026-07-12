@@ -133,4 +133,5 @@ dmypy.json
 
 # local creds
 local.json
+credentials.json
 reservation_configs/**
